@@ -6,6 +6,7 @@ pub use entities::groundstation::Groundstation;
 pub use entities::task::Task;
 pub use entities::task::TaskStatus;
 pub use entities::task::TaskUpdateRequest;
+pub use entities::antenna::Antenna;
 
 pub struct CitraClient {
     base_url: String,
@@ -185,6 +186,76 @@ impl CitraClient {
             .json::<Task>()
             .await?;
         Ok(response)
+    }
+
+    pub async fn list_antennas(&self) -> Result<Vec<Antenna>, reqwest::Error> {
+        let url = format!("{}antennas", self.base_url);
+        let client = reqwest::Client::new();
+        let response = client
+            .get(&url)
+            .header("Authorization", format!("Bearer {}", self.api_key))
+            .send()
+            .await?
+            .json::<Vec<Antenna>>()
+            .await?;
+        Ok(response)
+    }
+
+    pub async fn get_antenna(&self, antenna_id: &str) -> Result<Antenna, reqwest::Error> {
+        let url = format!("{}antennas/{}", self.base_url, antenna_id);
+        let client = reqwest::Client::new();
+        let response = client
+            .get(&url)
+            .header("Authorization", format!("Bearer {}", self.api_key))
+            .send()
+            .await?
+            .json::<Antenna>()
+            .await?;
+        Ok(response)
+    }
+
+    pub async fn create_antenna(&self, antenna: &Antenna) -> Result<Antenna, reqwest::Error> {
+        // API only implements a bulk create endpoint for antennas, so we wrap the single antenna in a vector
+        let url = format!("{}antennas", self.base_url);
+        let client = reqwest::Client::new();
+        let response = client
+            .post(&url)
+            .header("Authorization", format!("Bearer {}", self.api_key))
+            .json(&vec![antenna])
+            .send()
+            .await?
+            .json::<Vec<Antenna>>()
+            .await?;
+        Ok(response.into_iter().next().unwrap())
+    }
+
+    pub async fn delete_antenna(&self, antenna_id: &str) -> Result<(), reqwest::Error> {
+        // API only implements a bulk delete endpoint, with a vector of IDs
+        let url = format!("{}antennas", self.base_url);
+        let client = reqwest::Client::new();
+        client
+            .delete(&url)
+            .header("Authorization", format!("Bearer {}", self.api_key))
+            .json(&vec![antenna_id])
+            .send()
+            .await?
+            .error_for_status()?;
+        Ok(())
+    }
+
+    pub async fn update_antenna(&self, antenna: &Antenna) -> Result<Antenna, reqwest::Error> {
+        // API only implements a bulk update endpoint for antennas, so we wrap the single antenna in a vector
+        let url = format!("{}antennas", self.base_url);
+        let client = reqwest::Client::new();
+        let response = client
+            .put(&url)
+            .header("Authorization", format!("Bearer {}", self.api_key))
+            .json(&vec![antenna])
+            .send()
+            .await?
+            .json::<Vec<Antenna>>()
+            .await?;
+        Ok(response.into_iter().next().unwrap())
     }
 }
 

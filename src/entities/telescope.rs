@@ -9,6 +9,7 @@ pub struct Telescope {
     #[serde(rename = "groundStationId")]
     pub groundstation_id: Option<String>,
     pub user_id: String,
+    pub user_group_id: Option<String>,
     pub satellite_id: Option<String>,
     #[serde(rename = "creationEpoch")]
     pub created_at: DateTime<Utc>,
