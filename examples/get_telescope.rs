@@ -1,4 +1,5 @@
 use lemonaid::CitraClient;
+use lemonaid::TaskStatus;
 use std::env;
 
 #[tokio::main]
@@ -42,6 +43,20 @@ async fn main() {
         }
         Err(e) => {
             eprintln!("\n✗ Error fetching tasks for telescope: {}", e);
+        }
+    }
+
+    // Test get_telescope_tasks_by_status
+    let status_filter = vec![TaskStatus::Pending];
+    println!("\n\nFetching tasks for telescope: {} with status: {:?}", telescope_id, status_filter);
+    match client.get_telescope_tasks_by_status(telescope_id, status_filter).await {
+        Ok(tasks) => {
+            for task in tasks {
+                println!("  - Task ID: {}, Status: {:?}", task.id, task.status);
+            }
+        }
+        Err(e) => {
+            eprintln!("\n✗ Error fetching tasks for telescope by status: {}", e);
         }
     }
 

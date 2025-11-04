@@ -1,20 +1,3 @@
-/*
-"id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-    "userId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-    "groundStationId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-    "satelliteId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-    "userGroupId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-    "creationEpoch": "2025-11-04T18:00:32.399Z",
-    "lastConnectionEpoch": "2025-11-04T18:00:32.399Z",
-    "name": "string",
-    "minFrequency": 0,
-    "maxFrequency": 0,
-    "minElevation": 0,
-    "maxSlewRate": 0,
-    "homeAzimuth": 0,
-    "homeElevation": 0,
-    "halfPowerBeamWidth": 0
-*/
 use chrono::{DateTime, Utc};
 use serde::{Serialize, Deserialize};
 

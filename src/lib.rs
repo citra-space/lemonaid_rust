@@ -174,6 +174,21 @@ impl CitraClient {
         Ok(response.into_iter().collect())
     }
 
+    pub async fn get_telescope_tasks_by_status(&self, telescope_id: &str, statuses: Vec<TaskStatus>) -> Result<Vec<Task>, reqwest::Error> {
+        let status_params: Vec<String> = statuses.iter().map(|s| format!("statuses={:?}", s)).collect();
+        let query_string = status_params.join("&");
+        let url = format!("{}telescopes/{}/tasks?{}", self.base_url, telescope_id, query_string);
+        let client = reqwest::Client::new();
+        let response = client
+            .get(&url)
+            .header("Authorization", format!("Bearer {}", self.api_key))
+            .send()
+            .await?
+            .json::<Vec<Task>>()
+            .await?;
+        Ok(response.into_iter().collect())
+    }
+
     pub async fn update_task(&self, task: &TaskUpdateRequest) -> Result<Task, reqwest::Error> {
         let url = format!("{}tasks/{}", self.base_url, task.id);
         let client = reqwest::Client::new();
@@ -256,6 +271,34 @@ impl CitraClient {
             .json::<Vec<Antenna>>()
             .await?;
         Ok(response.into_iter().next().unwrap())
+    }
+
+    pub async fn list_tasks_for_antenna(&self, antenna_id: &str) -> Result<Vec<Task>, reqwest::Error> {
+        let url = format!("{}antennas/{}/tasks", self.base_url, antenna_id);
+        let client = reqwest::Client::new();
+        let response = client
+            .get(&url)
+            .header("Authorization", format!("Bearer {}", self.api_key))
+            .send()
+            .await?
+            .json::<Vec<Task>>()
+            .await?;
+        Ok(response.into_iter().collect())
+    }
+
+    pub async fn get_antenna_tasks_by_status(&self, antenna_id: &str, statuses: Vec<TaskStatus>) -> Result<Vec<Task>, reqwest::Error> {
+        let status_params: Vec<String> = statuses.iter().map(|s| format!("statuses={:?}", s)).collect();
+        let query_string = status_params.join("&");
+        let url = format!("{}antennas/{}/tasks?{}", self.base_url, antenna_id, query_string);
+        let client = reqwest::Client::new();
+        let response = client
+            .get(&url)
+            .header("Authorization", format!("Bearer {}", self.api_key))
+            .send()
+            .await?
+            .json::<Vec<Task>>()
+            .await?;
+        Ok(response.into_iter().collect())
     }
 }
 

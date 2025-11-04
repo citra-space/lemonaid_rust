@@ -1,4 +1,5 @@
 use lemonaid::CitraClient;
+use lemonaid::TaskStatus;
 use std::env;
 
 #[tokio::main]
@@ -28,6 +29,34 @@ async fn main() {
         Err(e) => {
             eprintln!("\n✗ Error: {}", e);
             std::process::exit(1);
+        }
+    }
+
+    // Test list_tasks_for_antenna
+    println!("\n\nFetching tasks for antenna: {}", antenna_id);
+    match client.list_tasks_for_antenna(antenna_id).await {
+        Ok(tasks) => {
+            println!("\n✓ Found {} task(s) for antenna {}", tasks.len(), antenna_id);
+            for task in tasks {
+                println!("  - Task ID: {}, Status: {:?}", task.id, task.status);
+            }
+        }
+        Err(e) => {
+            eprintln!("\n✗ Error fetching tasks for antenna: {}", e);
+        }
+    }
+
+    // Test get_antenna_tasks_by_status
+    let status_filter = vec![TaskStatus::Pending];
+    println!("\n\nFetching tasks for antenna: {} with status: {:?}", antenna_id, status_filter);
+    match client.get_antenna_tasks_by_status(antenna_id, status_filter).await {
+        Ok(tasks) => {
+            for task in tasks {
+                println!("  - Task ID: {}, Status: {:?}", task.id, task.status);
+            }
+        }
+        Err(e) => {
+            eprintln!("\n✗ Error fetching tasks for antenna by status: {}", e);
         }
     }
 
