@@ -31,7 +31,7 @@ pub struct Task {
     pub antenna_id: Option<String>,
     pub telescope_name: Option<String>,
     pub antenna_name: Option<String>,
-    pub ground_station_id: String,
+    pub ground_station_id: Option<String>,
     pub ground_station_name: Option<String>,
     pub priority: i32,
     pub scheduled_start: Option<DateTime<Utc>>,
@@ -52,4 +52,14 @@ pub struct TaskUpdateRequest {
     pub priority: Option<i32>,
     pub scheduled_start: Option<DateTime<Utc>>,
     pub scheduled_stop: Option<DateTime<Utc>>,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct CreateTaskRequest {
+    pub task_start: DateTime<Utc>,
+    pub task_stop: DateTime<Utc>,
+    pub satellite_id: String,
+    pub antenna_id: Option<String>,
+    pub telescope_id: Option<String>
 }

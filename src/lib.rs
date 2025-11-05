@@ -3,9 +3,7 @@ mod entities;
 // Re-export types for public API
 pub use entities::telescope::Telescope;
 pub use entities::groundstation::Groundstation;
-pub use entities::task::Task;
-pub use entities::task::TaskStatus;
-pub use entities::task::TaskUpdateRequest;
+pub use entities::task::{Task, TaskStatus, TaskUpdateRequest, CreateTaskRequest};
 pub use entities::antenna::Antenna;
 pub use entities::access::{SatelliteAccessToGroundstationRequest, HorizonAccess, FOVAccessRequest, FOVAccessResponse, SensorFrame};
 
@@ -225,6 +223,20 @@ impl CitraClient {
         let client = reqwest::Client::new();
         let response = client
             .put(&url)
+            .header("Authorization", format!("Bearer {}", self.api_key))
+            .json(task)
+            .send()
+            .await?
+            .json::<Task>()
+            .await?;
+        Ok(response)
+    }
+
+    pub async fn create_task(&self, task: &CreateTaskRequest) -> Result<Task, reqwest::Error> {
+        let url = format!("{}tasks", self.base_url);
+        let client = reqwest::Client::new();
+        let response = client
+            .post(&url)
             .header("Authorization", format!("Bearer {}", self.api_key))
             .json(task)
             .send()
