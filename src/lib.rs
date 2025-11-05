@@ -6,6 +6,7 @@ pub use entities::groundstation::Groundstation;
 pub use entities::task::{Task, TaskStatus, TaskUpdateRequest, CreateTaskRequest};
 pub use entities::antenna::Antenna;
 pub use entities::access::{SatelliteAccessToGroundstationRequest, HorizonAccess, FOVAccessRequest, FOVAccessResponse, SensorFrame};
+pub use entities::rf_observation::{CreateRFCaptureRequest, RFCapture, RFCaptureSummary};
 
 use crate::entities::groundstation::GroundstationCreateRequest;
 
@@ -321,6 +322,55 @@ impl CitraClient {
             .json::<Vec<Task>>()
             .await?;
         Ok(response.into_iter().collect())
+    }
+
+    pub async fn create_rf_capture(&self, rf_capture_request: &CreateRFCaptureRequest) -> Result<RFCapture, reqwest::Error> {
+        let url = format!("{}rf-captures", self.base_url);
+        let response = self.client
+            .post(&url)
+            .header("Authorization", format!("Bearer {}", self.api_key))
+            .json(rf_capture_request)
+            .send()
+            .await?
+            .json::<RFCapture>()
+            .await?;
+        Ok(response)
+    }
+
+    pub async fn get_rf_capture(&self, rf_capture_id: &str) -> Result<RFCapture, reqwest::Error> {
+        let url = format!("{}rf-captures/{}", self.base_url, rf_capture_id);
+        let response = self.client
+            .get(&url)
+            .header("Authorization", format!("Bearer {}", self.api_key))
+            .send()
+            .await?
+            .json::<RFCapture>()
+            .await?;
+        Ok(response)
+    }
+
+    pub async fn list_rf_captures_for_antenna(&self, antenna_id: &str) -> Result<Vec<RFCaptureSummary>, reqwest::Error> {
+        let url = format!("{}antennas/{}/rf-captures", self.base_url, antenna_id);
+        let response = self.client
+            .get(&url)
+            .header("Authorization", format!("Bearer {}", self.api_key))
+            .send()
+            .await?
+            .json::<Vec<RFCaptureSummary>>()
+            .await?;
+        Ok(response)
+    }
+
+    pub async fn list_rf_captures_for_task(&self, task_id: &str) -> Result<Vec<RFCaptureSummary>, reqwest::Error> {
+        let url = format!("{}tasks/{}/rf-captures", self.base_url, task_id);
+        let response = self.client
+            .get(&url)
+            .header("Authorization", format!("Bearer {}", self.api_key))
+            .send()
+            .await?
+            .json::<Vec<RFCaptureSummary>>()
+            .await?;
+        Ok(response)
     }
 }
 
