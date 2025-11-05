@@ -11,21 +11,22 @@ use crate::entities::groundstation::GroundstationCreateRequest;
 
 pub struct CitraClient {
     base_url: String,
-    api_key: String
+    api_key: String,
+    client: reqwest::Client
 }
 
 impl CitraClient {
     pub fn new(api_key: &str) -> Self {
         CitraClient {
             base_url: "https://dev.api.citra.space/".to_string(),
-            api_key: api_key.to_string()
+            api_key: api_key.to_string(),
+            client: reqwest::Client::new()
         }
     }
 
     pub async fn get_telescope(&self, telescope_id: &str) -> Result<Telescope, reqwest::Error> {
         let url = format!("{}telescopes/{}", self.base_url, telescope_id);
-        let client = reqwest::Client::new();
-        let response = client
+        let response = self.client
             .get(&url)
             .header("Authorization", format!("Bearer {}", self.api_key))
             .send()
@@ -37,8 +38,7 @@ impl CitraClient {
 
     pub async fn list_telescopes(&self) -> Result<Vec<Telescope>, reqwest::Error> {
         let url = format!("{}telescopes", self.base_url);
-        let client = reqwest::Client::new();
-        let response = client
+        let response = self.client
             .get(&url)
             .header("Authorization", format!("Bearer {}", self.api_key))
             .send()
@@ -51,8 +51,7 @@ impl CitraClient {
     pub async fn create_telescope(&self, telescope: &Telescope) -> Result<Telescope, reqwest::Error> {
         // API only implements a bulk create endpoint for telescopes, so we wrap the single telescope in a vector
         let url = format!("{}telescopes", self.base_url);
-        let client = reqwest::Client::new();
-        let response = client
+        let response = self.client
             .post(&url)
             .header("Authorization", format!("Bearer {}", self.api_key))
             .json(&vec![telescope])
@@ -66,8 +65,7 @@ impl CitraClient {
     pub async fn delete_telescope(&self, telescope_id: &str) -> Result<(), reqwest::Error> {
         // API only implements a bulk delete endpoint, with a vector of IDs
         let url = format!("{}telescopes", self.base_url);
-        let client = reqwest::Client::new();
-        client
+        self.client
             .delete(&url)
             .header("Authorization", format!("Bearer {}", self.api_key))
             .json(&vec![telescope_id])
@@ -80,8 +78,7 @@ impl CitraClient {
     pub async fn update_telescope(&self, telescope: &Telescope) -> Result<Telescope, reqwest::Error> {
         // API only implements a bulk update endpoint for telescopes, so we wrap the single telescope in a vector
         let url = format!("{}telescopes", self.base_url);
-        let client = reqwest::Client::new();
-        let response = client
+        let response = self.client
             .put(&url)
             .header("Authorization", format!("Bearer {}", self.api_key))
             .json(&vec![telescope])
@@ -94,8 +91,7 @@ impl CitraClient {
 
     pub async fn get_groundstation(&self, groundstation_id: &str) -> Result<Groundstation, reqwest::Error> {
         let url = format!("{}ground-stations/{}", self.base_url, groundstation_id);
-        let client = reqwest::Client::new();
-        let response = client
+        let response = self.client
             .get(&url)
             .header("Authorization", format!("Bearer {}", self.api_key))
             .send()
@@ -107,8 +103,7 @@ impl CitraClient {
 
     pub async fn list_groundstations(&self) -> Result<Vec<Groundstation>, reqwest::Error> {
         let url = format!("{}ground-stations", self.base_url);
-        let client = reqwest::Client::new();
-        let response = client
+        let response = self.client
             .get(&url)
             .header("Authorization", format!("Bearer {}", self.api_key))
             .send()
@@ -121,8 +116,7 @@ impl CitraClient {
     pub async fn create_groundstation(&self, groundstation: &GroundstationCreateRequest) -> Result<Groundstation, reqwest::Error> {
         // API only implements a bulk create endpoint for groundstations, so we wrap the single groundstation in a vector
         let url = format!("{}ground-stations", self.base_url);
-        let client = reqwest::Client::new();
-        let response = client
+        let response = self.client
             .post(&url)
             .header("Authorization", format!("Bearer {}", self.api_key))
             .json(&vec![groundstation])
@@ -136,8 +130,7 @@ impl CitraClient {
     pub async fn delete_groundstation(&self, groundstation_id: &str) -> Result<(), reqwest::Error> {
         // API only implements a bulk delete endpoint, with a vector of IDs
         let url = format!("{}ground-stations", self.base_url);
-        let client = reqwest::Client::new();
-        client
+        self.client
             .delete(&url)
             .header("Authorization", format!("Bearer {}", self.api_key))
             .json(&vec![groundstation_id])
@@ -150,8 +143,7 @@ impl CitraClient {
     pub async fn update_groundstation(&self, groundstation_id: &str, groundstation: &GroundstationCreateRequest) -> Result<Groundstation, reqwest::Error> {
         // API only implements a bulk update endpoint for groundstations, so we wrap the single groundstation in a vector
         let url = format!("{}ground-stations/{}", self.base_url, groundstation_id);
-        let client = reqwest::Client::new();
-        let response = client
+        let response = self.client
             .put(&url)
             .header("Authorization", format!("Bearer {}", self.api_key))
             .json(&vec![groundstation])
@@ -164,8 +156,7 @@ impl CitraClient {
 
     pub async fn solve_access_for_groundstation(&self, access_request: &SatelliteAccessToGroundstationRequest) -> Result<Vec<HorizonAccess>, reqwest::Error> {
         let url = format!("{}access/window/satellites_to_ground_station", self.base_url);
-        let client = reqwest::Client::new();
-        let response = client
+        let response = self.client
             .post(&url)
             .header("Authorization", format!("Bearer {}", self.api_key))
             .json(access_request)
@@ -178,8 +169,7 @@ impl CitraClient {
 
     pub async fn solve_fov_access(&self, fov_request: &FOVAccessRequest) -> Result<Vec<FOVAccessResponse>, reqwest::Error> {
         let url = format!("{}access/fov", self.base_url);
-        let client = reqwest::Client::new();
-        let response = client
+        let response = self.client
             .post(&url)
             .header("Authorization", format!("Bearer {}", self.api_key))
             .json(fov_request)
@@ -192,8 +182,7 @@ impl CitraClient {
 
     pub async fn list_tasks_for_telescope(&self, telescope_id: &str) -> Result<Vec<Task>, reqwest::Error> {
         let url = format!("{}telescopes/{}/tasks", self.base_url, telescope_id);
-        let client = reqwest::Client::new();
-        let response = client
+        let response = self.client
             .get(&url)
             .header("Authorization", format!("Bearer {}", self.api_key))
             .send()
@@ -207,8 +196,7 @@ impl CitraClient {
         let status_params: Vec<String> = statuses.iter().map(|s| format!("statuses={:?}", s)).collect();
         let query_string = status_params.join("&");
         let url = format!("{}telescopes/{}/tasks?{}", self.base_url, telescope_id, query_string);
-        let client = reqwest::Client::new();
-        let response = client
+        let response = self.client
             .get(&url)
             .header("Authorization", format!("Bearer {}", self.api_key))
             .send()
@@ -220,8 +208,7 @@ impl CitraClient {
 
     pub async fn update_task(&self, task: &TaskUpdateRequest) -> Result<Task, reqwest::Error> {
         let url = format!("{}tasks/{}", self.base_url, task.id);
-        let client = reqwest::Client::new();
-        let response = client
+        let response = self.client
             .put(&url)
             .header("Authorization", format!("Bearer {}", self.api_key))
             .json(task)
@@ -234,8 +221,7 @@ impl CitraClient {
 
     pub async fn create_task(&self, task: &CreateTaskRequest) -> Result<Task, reqwest::Error> {
         let url = format!("{}tasks", self.base_url);
-        let client = reqwest::Client::new();
-        let response = client
+        let response = self.client
             .post(&url)
             .header("Authorization", format!("Bearer {}", self.api_key))
             .json(task)
@@ -248,8 +234,7 @@ impl CitraClient {
 
     pub async fn list_antennas(&self) -> Result<Vec<Antenna>, reqwest::Error> {
         let url = format!("{}antennas", self.base_url);
-        let client = reqwest::Client::new();
-        let response = client
+        let response = self.client
             .get(&url)
             .header("Authorization", format!("Bearer {}", self.api_key))
             .send()
@@ -261,8 +246,7 @@ impl CitraClient {
 
     pub async fn get_antenna(&self, antenna_id: &str) -> Result<Antenna, reqwest::Error> {
         let url = format!("{}antennas/{}", self.base_url, antenna_id);
-        let client = reqwest::Client::new();
-        let response = client
+        let response = self.client
             .get(&url)
             .header("Authorization", format!("Bearer {}", self.api_key))
             .send()
@@ -275,8 +259,7 @@ impl CitraClient {
     pub async fn create_antenna(&self, antenna: &Antenna) -> Result<Antenna, reqwest::Error> {
         // API only implements a bulk create endpoint for antennas, so we wrap the single antenna in a vector
         let url = format!("{}antennas", self.base_url);
-        let client = reqwest::Client::new();
-        let response = client
+        let response = self.client
             .post(&url)
             .header("Authorization", format!("Bearer {}", self.api_key))
             .json(&vec![antenna])
@@ -290,8 +273,7 @@ impl CitraClient {
     pub async fn delete_antenna(&self, antenna_id: &str) -> Result<(), reqwest::Error> {
         // API only implements a bulk delete endpoint, with a vector of IDs
         let url = format!("{}antennas", self.base_url);
-        let client = reqwest::Client::new();
-        client
+        self.client
             .delete(&url)
             .header("Authorization", format!("Bearer {}", self.api_key))
             .json(&vec![antenna_id])
@@ -304,8 +286,7 @@ impl CitraClient {
     pub async fn update_antenna(&self, antenna: &Antenna) -> Result<Antenna, reqwest::Error> {
         // API only implements a bulk update endpoint for antennas, so we wrap the single antenna in a vector
         let url = format!("{}antennas", self.base_url);
-        let client = reqwest::Client::new();
-        let response = client
+        let response = self.client
             .put(&url)
             .header("Authorization", format!("Bearer {}", self.api_key))
             .json(&vec![antenna])
@@ -318,8 +299,7 @@ impl CitraClient {
 
     pub async fn list_tasks_for_antenna(&self, antenna_id: &str) -> Result<Vec<Task>, reqwest::Error> {
         let url = format!("{}antennas/{}/tasks", self.base_url, antenna_id);
-        let client = reqwest::Client::new();
-        let response = client
+        let response = self.client
             .get(&url)
             .header("Authorization", format!("Bearer {}", self.api_key))
             .send()
@@ -333,8 +313,7 @@ impl CitraClient {
         let status_params: Vec<String> = statuses.iter().map(|s| format!("statuses={:?}", s)).collect();
         let query_string = status_params.join("&");
         let url = format!("{}antennas/{}/tasks?{}", self.base_url, antenna_id, query_string);
-        let client = reqwest::Client::new();
-        let response = client
+        let response = self.client
             .get(&url)
             .header("Authorization", format!("Bearer {}", self.api_key))
             .send()
