@@ -8,6 +8,8 @@ pub use entities::task::TaskStatus;
 pub use entities::task::TaskUpdateRequest;
 pub use entities::antenna::Antenna;
 
+use crate::entities::groundstation::GroundstationCreateRequest;
+
 pub struct CitraClient {
     base_url: String,
     api_key: String
@@ -117,7 +119,7 @@ impl CitraClient {
         Ok(response.ground_stations)
     }
 
-    pub async fn create_groundstation(&self, groundstation: &Groundstation) -> Result<Groundstation, reqwest::Error> {
+    pub async fn create_groundstation(&self, groundstation: &GroundstationCreateRequest) -> Result<Groundstation, reqwest::Error> {
         // API only implements a bulk create endpoint for groundstations, so we wrap the single groundstation in a vector
         let url = format!("{}ground-stations", self.base_url);
         let client = reqwest::Client::new();
@@ -146,9 +148,9 @@ impl CitraClient {
         Ok(())
     }
 
-    pub async fn update_groundstation(&self, groundstation: &Groundstation) -> Result<Groundstation, reqwest::Error> {
+    pub async fn update_groundstation(&self, groundstation_id: &str, groundstation: &GroundstationCreateRequest) -> Result<Groundstation, reqwest::Error> {
         // API only implements a bulk update endpoint for groundstations, so we wrap the single groundstation in a vector
-        let url = format!("{}ground-stations", self.base_url);
+        let url = format!("{}ground-stations/{}", self.base_url, groundstation_id);
         let client = reqwest::Client::new();
         let response = client
             .put(&url)

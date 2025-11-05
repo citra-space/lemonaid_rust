@@ -1,6 +1,6 @@
 [package]
 name = "lemonaid"
-version = "0.1.2"
+version = "0.1.3"
 edition = "2024"
 license = "MIT OR Apache-2.0"
 description = "An HTTP client for the Citra Space API"
