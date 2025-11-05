@@ -7,6 +7,7 @@ pub use entities::task::Task;
 pub use entities::task::TaskStatus;
 pub use entities::task::TaskUpdateRequest;
 pub use entities::antenna::Antenna;
+pub use entities::access::{SatelliteAccessToGroundstationRequest, HorizonAccess, FOVAccessRequest, FOVAccessResponse, SensorFrame};
 
 use crate::entities::groundstation::GroundstationCreateRequest;
 
@@ -161,6 +162,34 @@ impl CitraClient {
             .json::<Vec<Groundstation>>()
             .await?;
         Ok(response.into_iter().next().unwrap())
+    }
+
+    pub async fn solve_access_for_groundstation(&self, access_request: &SatelliteAccessToGroundstationRequest) -> Result<Vec<HorizonAccess>, reqwest::Error> {
+        let url = format!("{}access/window/satellites_to_ground_station", self.base_url);
+        let client = reqwest::Client::new();
+        let response = client
+            .post(&url)
+            .header("Authorization", format!("Bearer {}", self.api_key))
+            .json(access_request)
+            .send()
+            .await?
+            .json::<Vec<HorizonAccess>>()
+            .await?;
+        Ok(response)
+    }
+
+    pub async fn solve_fov_access(&self, fov_request: &FOVAccessRequest) -> Result<Vec<FOVAccessResponse>, reqwest::Error> {
+        let url = format!("{}access/fov", self.base_url);
+        let client = reqwest::Client::new();
+        let response = client
+            .post(&url)
+            .header("Authorization", format!("Bearer {}", self.api_key))
+            .json(fov_request)
+            .send()
+            .await?
+            .json::<Vec<FOVAccessResponse>>()
+            .await?;
+        Ok(response)
     }
 
     pub async fn list_tasks_for_telescope(&self, telescope_id: &str) -> Result<Vec<Task>, reqwest::Error> {
