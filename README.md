@@ -1,3 +1,3 @@
 # Lemonaid
 
-Lemonaid is an HTTP client for the Citra Space API.
+Lemonaid is an HTTP client for the Citra Space API, supporting both dev and prod endpoints.

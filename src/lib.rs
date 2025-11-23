@@ -13,11 +13,18 @@ use crate::entities::groundstation::GroundstationCreateRequest;
 pub struct CitraClient {
     base_url: String,
     api_key: String,
-    client: reqwest::Client
+    client: reqwest::Client,
 }
 
 impl CitraClient {
-    pub fn new(api_key: &str) -> Self {
+    pub fn new(api_key: &str, dev: bool) -> Self {
+        if !dev {
+            return CitraClient {
+                base_url: "https://api.citra.space/".to_string(),
+                api_key: api_key.to_string(),
+                client: reqwest::Client::new()
+            }
+        }
         CitraClient {
             base_url: "https://dev.api.citra.space/".to_string(),
             api_key: api_key.to_string(),

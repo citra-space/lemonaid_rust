@@ -29,7 +29,7 @@ async fn main() {
         task_stop: stop_time,
     };
 
-    match lemonaid::CitraClient::new(&api_key).create_task(&create_request).await {
+    match lemonaid::CitraClient::new(&api_key, true).create_task(&create_request).await {
         Ok(created_task) => {
             println!("\n✓ Success!");
             println!("{:#?}", created_task);

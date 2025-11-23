@@ -8,7 +8,7 @@ async fn main() {
         .expect("CITRA_PAT environment variable not set");
 
     // Create client
-    let client = CitraClient::new(&api_key);
+    let client = CitraClient::new(&api_key, true);
 
     // Get groundstation ID from command line argument if provided
     let args: Vec<String> = env::args().collect();

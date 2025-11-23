@@ -8,7 +8,7 @@ async fn main() {
         .expect("CITRA_PAT environment variable not set");
 
     // Create client
-    let client = CitraClient::new(&api_key);
+    let client = CitraClient::new(&api_key, true);
 
     // Get command line arguments
     let args: Vec<String> = env::args().collect();

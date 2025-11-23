@@ -9,7 +9,7 @@ async fn main() {
         .expect("CITRA_PAT environment variable not set");
 
     // Create client
-    let client = CitraClient::new(&api_key);
+    let client = CitraClient::new(&api_key, true);
 
     // Get telescope ID from command line argument
     let args: Vec<String> = env::args().collect();
