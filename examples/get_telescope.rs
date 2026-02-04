@@ -66,7 +66,7 @@ async fn main() {
         Ok(telescopes) => {
             println!("\n✓ Found {} telescope(s)", telescopes.len());
             for telescope in telescopes {
-                println!("  - {} ({})", telescope.name, telescope.id);
+                println!("  - {} ({})", telescope.name.as_deref().unwrap_or("Unknown"), telescope.id);
             }
         }
         Err(e) => {
