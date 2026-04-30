@@ -30,6 +30,17 @@ fn main() {
     // for those status codes, which still surfaces the raw response.
     strip_bodyless_error_responses(&mut value);
 
+    // typify names generated types from each schema's `title`. FastAPI
+    // attaches identical titles ("Status", "Type", …) to inline property
+    // schemas across unrelated parent types, which collides into a single
+    // Rust enum that has the variants of the first-encountered shape only.
+    // Strip `title` from inline schemas underneath property definitions so
+    // typify falls back to path-based names like `<Parent><Property>`,
+    // which are unique by construction. Top-level entries in
+    // `components.schemas` keep their titles so their type names stay
+    // stable.
+    strip_inline_property_titles(&mut value);
+
     let normalized = serde_json::to_string(&value).expect("serialize normalized spec");
     let spec: openapiv3::OpenAPI = serde_json::from_str(&normalized)
         .unwrap_or_else(|e| panic!("parse downconverted spec as OpenAPI 3.0: {e}"));
@@ -142,6 +153,63 @@ fn downconvert_3_1_to_3_0(value: &mut Value) {
     } else if let Value::Array(arr) = value {
         for v in arr.iter_mut() {
             downconvert_3_1_to_3_0(v);
+        }
+    }
+}
+
+fn strip_inline_property_titles(value: &mut Value) {
+    let Some(schemas) = value
+        .pointer_mut("/components/schemas")
+        .and_then(Value::as_object_mut)
+    else {
+        return;
+    };
+    for (_name, schema) in schemas.iter_mut() {
+        strip_titles_inside_properties(schema);
+    }
+}
+
+fn strip_titles_inside_properties(schema: &mut Value) {
+    let Some(map) = schema.as_object_mut() else {
+        return;
+    };
+    if let Some(props) = map.get_mut("properties").and_then(Value::as_object_mut) {
+        for (_prop, prop_schema) in props.iter_mut() {
+            strip_titles_recursively(prop_schema);
+        }
+    }
+    for branch_key in ["allOf", "oneOf", "anyOf"] {
+        if let Some(arr) = map.get_mut(branch_key).and_then(Value::as_array_mut) {
+            for item in arr.iter_mut() {
+                strip_titles_inside_properties(item);
+            }
+        }
+    }
+}
+
+fn strip_titles_recursively(schema: &mut Value) {
+    let Some(map) = schema.as_object_mut() else {
+        return;
+    };
+    map.remove("title");
+    if let Some(props) = map.get_mut("properties").and_then(Value::as_object_mut) {
+        for (_, child) in props.iter_mut() {
+            strip_titles_recursively(child);
+        }
+    }
+    if let Some(items) = map.get_mut("items") {
+        strip_titles_recursively(items);
+    }
+    if let Some(addl) = map.get_mut("additionalProperties") {
+        if addl.is_object() {
+            strip_titles_recursively(addl);
+        }
+    }
+    for branch_key in ["allOf", "oneOf", "anyOf"] {
+        if let Some(arr) = map.get_mut(branch_key).and_then(Value::as_array_mut) {
+            for item in arr.iter_mut() {
+                strip_titles_recursively(item);
+            }
         }
     }
 }
